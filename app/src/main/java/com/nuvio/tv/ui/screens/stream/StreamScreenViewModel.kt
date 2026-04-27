@@ -377,8 +377,15 @@ class StreamScreenViewModel @Inject constructor(
                             lastSuccessData = result.data
                             applySuccess(result.data, isAllLoaded = false)
                             if (timeoutElapsed && !autoSelectTriggered) {
-                                autoSelectTriggered = true
                                 applySuccess(result.data, isAllLoaded = true)
+                                // For REGEX_MATCH, only lock out retries once a stream
+                                // was actually found. If nothing matched this batch we
+                                // leave autoSelectTriggered=false so subsequent batches
+                                // (or the all-done handler below) can try again with
+                                // more complete data.
+                                if (playerSettings.streamAutoPlayMode != StreamAutoPlayMode.REGEX_MATCH || resolvedAutoPlayTarget) {
+                                    autoSelectTriggered = true
+                                }
                             }
                         }
                         is NetworkResult.Error -> {
@@ -434,8 +441,10 @@ class StreamScreenViewModel @Inject constructor(
             }
             timeoutElapsed = true
             if (!autoSelectTriggered && lastSuccessData != null) {
-                autoSelectTriggered = true
                 applySuccess(lastSuccessData!!, isAllLoaded = true)
+                if (playerSettings.streamAutoPlayMode != StreamAutoPlayMode.REGEX_MATCH || resolvedAutoPlayTarget) {
+                    autoSelectTriggered = true
+                }
             }
 
             // Hard wall-clock fallback: if the upstream stream flow never terminates

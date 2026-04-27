@@ -1053,8 +1053,13 @@ internal fun PlayerRuntimeController.playNextEpisode() {
                         is NetworkResult.Success -> {
                             lastSuccessData = result.data
                             if (timeoutElapsed && !autoSelectTriggered) {
-                                autoSelectTriggered = true
                                 selectedStream = trySelectStream(result.data)
+                                // For REGEX_MATCH, only lock out retries once a stream
+                                // was actually found so later batches / the all-done
+                                // handler can retry with more complete data.
+                                if (effectiveMode != StreamAutoPlayMode.REGEX_MATCH || selectedStream != null) {
+                                    autoSelectTriggered = true
+                                }
                             }
                         }
                         is NetworkResult.Error -> lastError = result
@@ -1072,8 +1077,10 @@ internal fun PlayerRuntimeController.playNextEpisode() {
                 delay(timeoutMs)
                 timeoutElapsed = true
                 if (!autoSelectTriggered && lastSuccessData != null) {
-                    autoSelectTriggered = true
                     selectedStream = trySelectStream(lastSuccessData!!)
+                    if (effectiveMode != StreamAutoPlayMode.REGEX_MATCH || selectedStream != null) {
+                        autoSelectTriggered = true
+                    }
                 }
                 if (selectedStream != null) {
                     innerJob.cancel()
