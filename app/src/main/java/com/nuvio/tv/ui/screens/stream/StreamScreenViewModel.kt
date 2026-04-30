@@ -432,13 +432,13 @@ class StreamScreenViewModel @Inject constructor(
             val timeoutMs = playerSettings.streamAutoPlayTimeoutSeconds * 1_000L
             if (timeoutMs > 0L && playerSettings.streamAutoPlayTimeoutSeconds < 11) {
                 delay(timeoutMs)
-            }
-            timeoutElapsed = true
-            if (!autoSelectTriggered && lastSuccessData != null) {
-                // Timeout is a hard stop for addon results: apply final pass and
-                // consume the attempt so later results are ignored.
-                applySuccess(lastSuccessData!!, isAllLoaded = true)
-                autoSelectTriggered = true
+                timeoutElapsed = true
+                if (!autoSelectTriggered && lastSuccessData != null) {
+                    // Timeout is a hard stop for addon results: apply final pass and
+                    // consume the attempt so later results are ignored.
+                    applySuccess(lastSuccessData!!, isAllLoaded = true)
+                    autoSelectTriggered = true
+                }
             }
 
             // Hard wall-clock fallback: if the upstream stream flow never terminates
