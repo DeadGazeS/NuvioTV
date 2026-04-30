@@ -435,8 +435,10 @@ class StreamScreenViewModel @Inject constructor(
             }
             timeoutElapsed = true
             if (!autoSelectTriggered && lastSuccessData != null) {
-                autoSelectTriggered = true
+                // Timeout is a hard stop for addon results: apply final pass and
+                // consume the attempt so later results are ignored.
                 applySuccess(lastSuccessData!!, isAllLoaded = true)
+                autoSelectTriggered = true
             }
 
             // Hard wall-clock fallback: if the upstream stream flow never terminates
@@ -450,8 +452,8 @@ class StreamScreenViewModel @Inject constructor(
                     Log.w(TAG, "Direct autoplay hard timeout reached; falling back to manual selection")
                     lastSuccessData?.let {
                         if (!autoSelectTriggered) {
-                            autoSelectTriggered = true
                             applySuccess(it, isAllLoaded = true)
+                            autoSelectTriggered = true
                         }
                     }
                     if (!resolvedAutoPlayTarget) {

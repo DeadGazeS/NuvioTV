@@ -1081,8 +1081,10 @@ internal fun PlayerRuntimeController.playNextEpisode() {
                 delay(timeoutMs)
                 timeoutElapsed = true
                 if (!autoSelectTriggered && lastSuccessData != null) {
-                    autoSelectTriggered = true
+                    // Timeout is a hard stop for addon results: do a final selection
+                    // from whatever has arrived and mark the attempt consumed.
                     selectedStream = trySelectStream(lastSuccessData!!)
+                    autoSelectTriggered = true
                 }
                 if (selectedStream != null) {
                     innerJob.cancel()
